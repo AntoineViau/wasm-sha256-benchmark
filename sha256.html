@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="sjcl.js"></script>
+</head>
+
+<body>
+    <script async type="text/javascript" src="sha256.js"></script>
+    <script>
+
+        var DATA = "lorem ipsum";
+        var NB_NONCES = 1000000;
+
+        function jsHash(src) {
+            var bitArray = sjcl.hash.sha256.hash(src);
+            return digest_sha256 = sjcl.codec.hex.fromBits(bitArray);
+        }
+
+        var wasmHash = undefined;
+
+        function hashTest(src, nbNonces, fn) {
+            let start, prev, now;
+            prev = start = now = (new Date()).getTime();
+            let nonce = 0;
+            while (nonce < nbNonces) {
+                fn(src + nonce);
+                nonce++;
+                now = (new Date()).getTime();
+                let diff = now - prev;
+                prev = now;
+                if (nonce % 100000 === 0) {
+                    console.log(Math.floor(nonce / ((now - start) / 1000)) + ' hashes/sec')
+                }
+            }
+            console.log('done in', Math.floor((now - start) / 1000));
+        }
+
+        var Module = {
+            onRuntimeInitialized: () => {
+                let r, str;
+
+                console.log('WASM -----------------------------');
+                wasmHash = Module.cwrap('sha256', 'string', ['string']);
+                hashTest(DATA, NB_NONCES, wasmHash);
+
+                console.log('WASM BATCH -----------------------------');
+                wasmHashBatch = Module.cwrap('sha256Batch', 'void', ['string', 'number']);
+                console.log('start');
+                let start, prev, now;
+                start = (new Date()).getTime();
+                wasmHashBatch(DATA, NB_NONCES);
+                now = (new Date()).getTime();
+                console.log('done in', Math.floor((now - start) / 1000));
+
+                console.log('JS-----------------------------');
+                hashTest(DATA, NB_NONCES, jsHash);
+            }
+        };
+
+
+    </script>
+</body>
+
+</html>
