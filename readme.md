@@ -1,0 +1,1 @@
+# Web Assembly benchmark with SHA256 libraries

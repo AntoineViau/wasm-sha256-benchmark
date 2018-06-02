@@ -217,10 +217,6 @@ void EMSCRIPTEN_KEEPALIVE sha256Batch(char *str, int maxNonce)
         sprintf(src, "%s%d", str, nonce);
         sha256(src);
         nonce++;
-        // if ((nonce % 10) == 0)
-        // {
-        //     printf("Coucou %d", nonce);
-        // }
     }
 }
 
