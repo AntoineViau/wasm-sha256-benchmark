@@ -35,28 +35,26 @@
                     console.log(Math.floor(nonce / ((now - start) / 1000)) + ' hashes/sec')
                 }
             }
-            console.log('done in', Math.floor((now - start) / 1000));
+            console.log('done in', now - start);
         }
 
         var Module = {
             onRuntimeInitialized: () => {
                 let r, str;
 
-                console.log('WASM -----------------------------');
+
+                hashTest(DATA, NB_NONCES, jsHash);
+
                 wasmHash = Module.cwrap('sha256', 'string', ['string']);
                 hashTest(DATA, NB_NONCES, wasmHash);
 
-                console.log('WASM BATCH -----------------------------');
                 wasmHashBatch = Module.cwrap('sha256Batch', 'void', ['string', 'number']);
                 console.log('start');
                 let start, prev, now;
                 start = (new Date()).getTime();
                 wasmHashBatch(DATA, NB_NONCES);
                 now = (new Date()).getTime();
-                console.log('done in', Math.floor((now - start) / 1000));
-
-                console.log('JS-----------------------------');
-                hashTest(DATA, NB_NONCES, jsHash);
+                console.log('done in', now - start);
             }
         };
 
